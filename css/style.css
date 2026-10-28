@@ -216,19 +216,22 @@ button:focus-visible {
 }
 
 .hero-panel {
+  position: relative;
   background: linear-gradient(160deg, #1a335c, #101a2e);
   border: 1px solid var(--line);
   border-radius: 28px;
+  width: 100%;
   aspect-ratio: 1 / 1;
-  display: grid;
-  place-items: center;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 .hero-panel img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
   object-position: center;
   display: block;
@@ -284,14 +287,20 @@ button:focus-visible {
 
 .card-media {
   position: relative;
-  background: #0e1730;
+  display: block;
+  width: 100%;
   aspect-ratio: 1 / 1;
+  background: #0e1730;
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
 .card-media img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
   object-position: center;
   display: block;
@@ -303,6 +312,14 @@ button:focus-visible {
   flex-direction: column;
   gap: 8px;
   flex: 1;
+}
+
+.card-body > p.muted:not(.tiny) {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em;
 }
 
 .card-body h3 {
@@ -415,16 +432,21 @@ button:focus-visible {
 }
 
 .detail-media {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 24px;
   overflow: hidden;
+  width: 100%;
   aspect-ratio: 1 / 1;
 }
 
 .detail-media img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
   object-position: center;
   display: block;
