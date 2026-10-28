@@ -57,8 +57,19 @@ function getProduct(id) {
   return PRODUCTS.find((item) => item.id === id);
 }
 
+const FREE_SHIPPING_AT = 50;
+const SHIPPING_USD = 6;
+
 function formatPrice(value) {
-  return new Intl.NumberFormat("tr-TR").format(value) + " TL";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+function shippingFor(subtotal) {
+  return subtotal >= FREE_SHIPPING_AT ? 0 : SHIPPING_USD;
 }
 
 function uniqueCategories() {

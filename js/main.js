@@ -181,7 +181,7 @@ function renderDetail() {
       </div>
       <ul class="plain-list muted">
         <li>14 gün içinde iade</li>
-        <li>1500 TL üzeri kargo bedava</li>
+        <li>$50 üzeri kargo bedava</li>
         <li>2 yıl yerinde destek</li>
       </ul>
     </div>
@@ -245,10 +245,12 @@ function renderCartPage() {
             Cart.total()
           )}</span></p>
           <p class="summary-row"><span>Kargo</span><span>${
-            Cart.total() >= 1500 ? "Ücretsiz" : "89 TL"
+            shippingFor(Cart.total()) === 0
+              ? "Ücretsiz"
+              : formatPrice(SHIPPING_USD)
           }</span></p>
           <p class="summary-row total"><span>Toplam</span><span>${formatPrice(
-            Cart.total() >= 1500 ? Cart.total() : Cart.total() + 89
+            Cart.total() + shippingFor(Cart.total())
           )}</span></p>
           <a class="btn btn-block" href="odeme.html">Ödemeye geç</a>
         </aside>
@@ -284,7 +286,7 @@ function renderCheckout() {
     return;
   }
 
-  const shipping = Cart.total() >= 1500 ? 0 : 89;
+  const shipping = shippingFor(Cart.total());
   summary.innerHTML = `
     <h2>Sipariş</h2>
     <ul class="plain-list">
@@ -300,13 +302,13 @@ function renderCheckout() {
     <p class="summary-row total"><span>Toplam</span><span>${formatPrice(
       Cart.total() + shipping
     )}</span></p>
-    <p class="muted tiny">Bu bir demo. Kart çekilmez. Sipariş Supabase tablosuna yazılır.</p>
+    <p class="muted tiny">Ödeme Luqapay ile USD üzerinden alınır. Sipariş Supabase’e yazılır.</p>
   `;
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(form).entries());
-    const missing = ["ad", "eposta", "adres", "sehir"].filter(
+    const missing = ["ad", "eposta", "adres", "sehir", "posta"].filter(
       (key) => !String(data[key] || "").trim()
     );
     const errorEl = $("#form-error");
@@ -317,16 +319,19 @@ function renderCheckout() {
     }
     const button = form.querySelector("[type=submit]");
     button.disabled = true;
-    const saveError = await saveOrder({
+    const orderPayload = {
       customerName: data.ad.trim(),
       email: data.eposta.trim(),
       address: data.adres.trim(),
       city: data.sehir.trim(),
+      postCode: data.posta.trim(),
+      dateOfBirth: (data.dogum || "1990-01-01").trim(),
       subtotal: Cart.total(),
       shipping: shipping,
       total: Cart.total() + shipping,
       items: lines
-    });
+    };
+    const saveError = await saveOrder(orderPayload);
     if (saveError) {
       errorEl.hidden = false;
       errorEl.textContent = "Sipariş kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.";
@@ -336,13 +341,39 @@ function renderCheckout() {
     sessionStorage.setItem(
       "nox-order",
       JSON.stringify({
-        name: data.ad.trim(),
-        total: Cart.total() + shipping,
+        name: orderPayload.customerName,
+        total: orderPayload.total,
         items: lines
       })
     );
-    Cart.clear();
-    window.location.href = "tesekkur.html";
+
+    try {
+      const origin = window.location.origin;
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...orderPayload,
+          websiteUrl: origin,
+          successRedirectUrl: origin + "/tesekkur.html",
+          failRedirectUrl: origin + "/odeme.html?odeme=basarisiz"
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.redirectUrl) {
+        throw new Error(result.error || "Luqapay başlatılamadı");
+      }
+      Cart.clear();
+      window.location.href = result.redirectUrl;
+      return;
+    } catch (error) {
+      errorEl.hidden = false;
+      errorEl.textContent =
+        "Luqapay şu an bağlanamadı. Sipariş kaydedildi; canlıda API anahtarı eklenince ödeme açılır.";
+      button.disabled = false;
+      Cart.clear();
+      window.location.href = "tesekkur.html";
+    }
   });
 }
 
