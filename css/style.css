@@ -241,6 +241,15 @@ button:focus-visible {
   padding: 0 0 24px;
 }
 
+.weather-bottom {
+  padding: 8px 0 24px;
+}
+
+.weather-bottom + .weather-bottom {
+  padding-top: 0;
+  padding-bottom: 48px;
+}
+
 .weather-card {
   display: flex;
   justify-content: space-between;
