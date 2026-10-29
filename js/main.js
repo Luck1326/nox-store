@@ -420,6 +420,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindHeaderSearch();
   bindNavToggle();
   const page = document.body.getAttribute("data-page");
+  if (page === "home" && typeof loadWeather === "function") {
+    loadWeather();
+  }
   try {
     await loadProducts();
   } catch (error) {

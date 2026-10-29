@@ -237,6 +237,36 @@ button:focus-visible {
   display: block;
 }
 
+.weather {
+  padding: 0 0 24px;
+}
+
+.weather-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  background: rgba(21, 34, 56, 0.55);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.weather-temp {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.weather-source {
+  margin: 0;
+}
+
+.weather-source a {
+  color: var(--accent-2);
+}
+
 .trust {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
