@@ -2,7 +2,7 @@ async function loadFx() {
   const root = document.getElementById("fx-root");
   if (!root) return;
 
-  const url = "https://api.frankfurter.app/latest?from=EUR&to=USD";
+  const url = "https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD";
 
   try {
     const response = await fetch(url);
